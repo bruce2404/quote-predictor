@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游客消费预测系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #e8f5e9; 
+            margin: 0;
+            padding: 10px; /* 手机端减少padding */
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px; /* 手机端减少padding */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border: 2px solid #4caf50; 
+        }
+        h1 {
+            color: #2e7d32; 
+            text-align: center;
+            margin-bottom: 20px; /* 手机端减少margin */
+            background: url('https://img.icons8.com/fluency/48/000000/airplane-take-off.png') no-repeat left center;
+            background-size: 30px;
+            padding-left: 40px;
+            display: inline-block;
+            font-size: 24px; /* 手机端调整字体大小 */
+        }
+        .section {
+            margin-bottom: 20px; /* 手机端减少margin */
+            padding: 15px; /* 手机端减少padding */
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            background-color: #f1f8e9; 
+        }
+        .section-title {
+            font-size: 16px; /* 手机端调整字体大小 */
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #388e3c; 
+            background: url('https://img.icons8.com/fluency/24/000000/map-pin.png') no-repeat left center;
+            background-size: 20px;
+            padding-left: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px; /* 手机端减少margin */
+            display: flex;
+            align-items: center;
+            flex-direction: column; /* 手机端垂直布局 */
+        }
+        label {
+            width: 100%; /* 手机端全宽 */
+            font-weight: bold;
+            color: #43a047;
+            margin-bottom: 5px; /* 手机端添加下边距 */
+            text-align: left;
+        }
+        input, select, textarea {
+            width: 100%; /* 手机端全宽 */
+            padding: 12px; /* 手机端增加padding便于触摸 */
+            border: 1px solid #a5d6a7;
+            border-radius: 4px;
+            font-size: 16px; /* 防止iOS缩放 */
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #2e7d32;
+            outline: none;
+        }
+        button {
+            padding: 12px 20px; /* 手机端增加触摸区域 */
+            background-color: #4caf50; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-height: 44px; /* iOS推荐的最小触摸区域 */
+        }
+        button:hover {
+            background-color: #43a047; 
+        }
+        .id-card-group {
+            display: flex;
+            margin-bottom: 10px;
+            flex-direction: column; /* 手机端垂直布局 */
+            gap: 10px;
+        }
+        .id-card-input {
+            margin-right: 0; /* 手机端移除右边距 */
+        }
+        .member-fields {
+            display: flex;
+            gap: 10px;
+            flex-direction: column; /* 手机端垂直布局 */
+        }
+        .add-btn {
+            background-color: #2196f3; 
+            width: 100%; /* 手机端全宽按钮 */
+            margin-bottom: 10px;
+        }
+        .add-btn:hover {
+            background-color: #1976d2; 
+        }
+        .remove-btn {
+            background-color: #f44336;
+            width: 100%; /* 手机端全宽按钮 */ 
+        }
+        .remove-btn:hover {
+            background-color: #d32f2f; 
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px; /* 手机端增加padding */
+            margin-top: 20px;
+            font-size: 18px; /* 手机端增大字体 */
+        }
+        
+        /* 桌面端样式 */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            .container {
+                padding: 30px;
+            }
+            h1 {
+                margin-bottom: 30px;
+                font-size: 28px;
+            }
+            .section {
+                margin-bottom: 30px;
+                padding: 20px;
+            }
+            .section-title {
+                font-size: 18px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+                flex-direction: row;
+            }
+            label {
+                width: 180px;
+                margin-bottom: 0;
+            }
+            input, select, textarea {
+                flex: 1;
+                padding: 10px;
+            }
+            .id-card-group {
+                flex-direction: row;
+                align-items: center;
+            }
+            .id-card-input {
+                flex: 1;
+                margin-right: 10px;
+            }
+            .member-fields {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+            }
+            .add-btn, .remove-btn {
+                width: auto;
+                padding: 8px 15px;
+            }
+            .submit-btn {
+                padding: 12px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>游客消费预测系统</h1>
+        <form method="POST" id="predictionForm">
+            <!-- 小组共同特征 -->
+            <div class="section">
+                <div class="section-title">小组共同特征</div>
+                <!-- 修改客户公司名输入部分 -->
+                <div class="form-group">
+                    <label for="客户公司名">客户公司名:</label>
+                    <input type="text" id="客户公司名" name="客户公司名" list="companyList" oninput="fillCustomerLevel()">
+                    <datalist id="companyList">
+                        {% for company in companies %}
+                        <option value="{{ company[0] }}">{{ company[0] }}</option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="客户等级">客户等级:</label>
+                    <input type="text" id="客户等级" name="客户等级" value="A" readonly>
+                </div>
+            </div>
+
+            <!-- 新增身份证提取输入框 -->
+            <div class="section">
+                <div class="section-title">身份证提取</div>
+                <div class="form-group">
+                    <label for="idCardExtractor">批量输入游客信息:</label>
+                    <textarea id="idCardExtractor" name="idCardExtractor" rows="5" placeholder="输入包含身份证号码的文本"></textarea>
+                </div>
+                <button type="button" class="add-btn" onclick="extractIdCards()">提取身份证</button>
+            </div>
+
+            <!-- 身份证输入部分 -->
+            <div class="section">
+                <div class="section-title">身份证信息 (1-10个)</div>
+                <div id="idCardContainer">
+                    <!-- 第一个身份证输入框 -->
+                    <div class="id-card-group">
+                        <input type="text" class="id-card-input" name="idCards[]" placeholder="请输入身份证号码" required>
+                        <div class="member-fields">
+                            <select name="is_return[]" required onchange="toggleTimeInterval(this)">
+                                <option value="否">首次入境</option>
+                                <option value="是">二次入境</option>
+                            </select>
+                            <input type="number" name="time_interval[]" placeholder="时间间隔(月)" min="0" style="display:none;">
+                        </div>
+                        <button type="button" class="remove-btn" onclick="removeIdCard(this)">删除</button>
+                    </div>
+                </div>
+                <button type="button" class="add-btn" onclick="addIdCard()">添加身份证</button>
+            </div>
+
+            <!-- 个人特征 (将通过身份证自动计算) -->
+            <input type="hidden" id="小组人数" name="小组人数">
+            <input type="hidden" id="城市人均购物金额" name="城市人均购物金额">
+            <input type="hidden" id="年龄分段" name="年龄分段">
+            <input type="hidden" id="性别" name="性别">
+            <input type="hidden" id="是否二次入境" name="是否二次入境">
+            <input type="hidden" id="时间间隔" name="时间间隔">
+
+            <button type="submit" class="submit-btn">预测消费金额</button>
+        </form>
+    </div>
+
+    <script>
+        // 切换时间间隔输入框显示
+        function toggleTimeInterval(select) {
+            const timeInput = select.nextElementSibling;
+            timeInput.style.display = select.value === "是" ? "block" : "none";
+            timeInput.required = select.value === "是";
+        }
+
+        // 添加身份证输入框（移除required）
+        // 在现有的JavaScript代码中添加移动端优化
+        function addIdCard() {
+            const container = document.getElementById('idCardContainer');
+            if (container.children.length >= 10) {
+                alert('最多只能输入10个身份证');
+                return;
+            }
+            
+            const newGroup = document.createElement('div');
+            newGroup.className = 'id-card-group';
+            newGroup.innerHTML = `
+                <input type="text" class="id-card-input" name="idCards[]" placeholder="请输入身份证号码">
+                <div class="member-fields">
+                    <select name="is_return[]" onchange="toggleTimeInterval(this)">
+                        <option value="否">首次入境</option>
+                        <option value="是">二次入境</option>
+                    </select>
+                    <input type="number" name="time_interval[]" placeholder="时间间隔(月)" min="0" style="display:none;">
+                </div>
+                <button type="button" class="remove-btn" onclick="removeIdCard(this)">删除</button>
+            `;
+            container.appendChild(newGroup);
+            
+            // 移动端滚动到新添加的输入框
+            if (window.innerWidth < 768) {
+                newGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // 添加触摸友好的提示
+        function showMobileAlert(message) {
+            if (window.innerWidth < 768) {
+                // 移动端使用更友好的提示方式
+                const alertDiv = document.createElement('div');
+                alertDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #333;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    z-index: 1000;
+                    font-size: 16px;
+                    text-align: center;
+                `;
+                alertDiv.textContent = message;
+                document.body.appendChild(alertDiv);
+                
+                setTimeout(() => {
+                    document.body.removeChild(alertDiv);
+                }, 2000);
+            } else {
+                alert(message);
+            }
+        }
+
+        // 提取身份证号码并添加到输入框（精确控制）
+        function extractIdCards() {
+            const inputText = document.getElementById('idCardExtractor').value;
+            const idCardRegex = /\d{17}[\dXx]/g;
+            const idCards = inputText.match(idCardRegex) || [];
+            const container = document.getElementById('idCardContainer');
+        
+            // 清空现有的身份证输入框，只保留第一个
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+        
+            // 如果没有提取到身份证，清空第一个输入框并返回
+            if (idCards.length === 0) {
+                container.children[0].querySelector('input[name="idCards[]"]').value = '';
+                return;
+            }
+        
+            // 精确创建需要的输入框数量
+            for (let i = container.children.length; i < idCards.length && i < 10; i++) {
+                addIdCard();
+            }
+        
+            // 填充身份证号码
+            idCards.forEach((idCard, index) => {
+                if (index < container.children.length) {
+                    container.children[index].querySelector('input[name="idCards[]"]').value = idCard;
+                }
+            });
+        }
+
+        // 表单提交前处理（简化版）
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            const validIdCards = document.querySelectorAll('input[name="idCards[]"]');
+            const validCount = Array.from(validIdCards).filter(input => input.value && input.value.trim()).length;
+            
+            if (validCount === 0) {
+                e.preventDefault();
+                alert('请至少输入一个有效的身份证号码');
+                return;
+            }
+            
+            document.getElementById('小组人数').value = validCount;
+        });
+
+        // 删除身份证输入框
+        function removeIdCard(button) {
+            const container = document.getElementById('idCardContainer');
+            if (container.children.length <= 1) {
+                alert('至少需要1个身份证');
+                return;
+            }
+            button.parentNode.remove();
+        }
+
+        // 初始化页面时绑定事件
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('.add-btn').addEventListener('click', addIdCard);
+        });
+
+        // 表单提交前处理
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            // 移除所有空身份证输入框的required属性
+            const allIdInputs = document.querySelectorAll('input[name="idCards[]"]');
+            const allSelects = document.querySelectorAll('select[name="is_return[]"]');
+            
+            allIdInputs.forEach((input, index) => {
+                if (!input.value || !input.value.trim()) {
+                    input.removeAttribute('required');
+                    if (allSelects[index]) {
+                        allSelects[index].removeAttribute('required');
+                    }
+                }
+            });
+            
+            // 计算有效身份证数量设置小组人数
+            const validIdCards = Array.from(allIdInputs).filter(input => input.value && input.value.trim());
+            document.getElementById('小组人数').value = validIdCards.length;
+        });
+
+        // 提取身份证号码并添加到输入框
+        function extractIdCards() {
+            const inputText = document.getElementById('idCardExtractor').value;
+            const idCardRegex = /\d{17}[\dXx]/g;
+            const idCards = inputText.match(idCardRegex) || [];
+            const container = document.getElementById('idCardContainer');
+        
+            // 清空现有的身份证输入框，只保留第一个
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+        
+            // 如果没有提取到身份证，清空第一个输入框并返回
+            if (idCards.length === 0) {
+                container.children[0].querySelector('input[name="idCards[]"]').value = '';
+                return;
+            }
+        
+            // 先为需要的身份证数量创建足够的输入框
+            while (container.children.length < idCards.length && container.children.length < 10) {
+                addIdCard();
+            }
+        
+            // 然后填充所有身份证号码
+            idCards.forEach((idCard, index) => {
+                if (index < container.children.length) {
+                    container.children[index].querySelector('input[name="idCards[]"]').value = idCard;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+<script>
+    function fillCustomerLevel() {
+        const companyInput = document.getElementById('客户公司名');
+        const levelInput = document.getElementById('客户等级');
+        const companies = {{ companies|tojson }};
+        const inputValue = companyInput.value;
+
+        // 如果公司名为空，设置默认等级为A
+        if (!inputValue.trim()) {
+            levelInput.value = 'A';
+            return;
+        }
+
+        // 查找匹配的公司等级
+        for (const company of companies) {
+            if (company[0] === inputValue) {
+                levelInput.value = company[1];
+                return;
+            }
+        }
+        // 若未找到匹配项，设置默认等级为A
+        levelInput.value = 'A';
+    }
+
+    // 页面加载时设置默认值
+    document.addEventListener('DOMContentLoaded', function() {
+        fillCustomerLevel();
+    });
+</script>
+</body>
+</html>
